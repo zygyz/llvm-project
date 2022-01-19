@@ -2265,6 +2265,19 @@ static int __kmp_dispatch_next(ident_t *loc, int gtid, kmp_int32 *p_last,
 #if INCLUDE_SSC_MARKS
   SSC_MARK_DISPATCH_NEXT();
 #endif
+  if (status != 0) {
+    if (ompt_enabled.ompt_callback_dispatch) {
+      ompt_team_info_t *team_info = __ompt_get_teaminfo(0, NULL);
+      ompt_task_info_t *task_info = __ompt_get_task_info_object(0);
+      ompt_data_t instance;
+      instance.value = (uint64_t)(*p_lb);
+      ompt_callbacks.ompt_callback(ompt_callback_dispatch)(
+         &(team_info->parallel_data),
+         &(task_info->task_data),
+         ompt_dispatch_iteration,
+         instance);
+    }
+  }
   OMPT_LOOP_END;
   KMP_STATS_LOOP_END;
   return status;
